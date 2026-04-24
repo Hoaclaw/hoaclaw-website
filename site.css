@@ -1,0 +1,262 @@
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-feature-settings: "ss01" on, "cv11" on;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.carousel-dot {
+  height: 0.625rem;
+  border-radius: 9999px;
+  transition: width 300ms ease, background-color 300ms ease;
+  cursor: pointer;
+}
+
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+.float-gentle {
+  animation: float-gentle 7s ease-in-out infinite;
+}
+
+@keyframes sun-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(1.08); }
+}
+
+.sun-glow {
+  transform-origin: 1050px 160px;
+  animation: sun-pulse 6s ease-in-out infinite;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 700ms ease-out, transform 700ms ease-out;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes rays-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.sun-rays-svg {
+  transform-origin: 1050px 160px;
+  animation: rays-rotate 140s linear infinite;
+}
+
+@keyframes sparkle-pulse {
+  0%, 100% { opacity: 0.25; transform: scale(0.75); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+
+.sparkle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sparkle-pulse 3.2s ease-in-out infinite;
+}
+.sparkle-2 { animation-delay: 0.7s; }
+.sparkle-3 { animation-delay: 1.4s; }
+.sparkle-4 { animation-delay: 2.1s; }
+
+@keyframes butterfly-a {
+  0%   { transform: translate(0, 0) rotate(-6deg); }
+  25%  { transform: translate(14px, -14px) rotate(4deg); }
+  50%  { transform: translate(30px, 4px) rotate(-3deg); }
+  75%  { transform: translate(14px, 16px) rotate(5deg); }
+  100% { transform: translate(0, 0) rotate(-6deg); }
+}
+
+@keyframes butterfly-b {
+  0%   { transform: translate(0, 0) rotate(4deg); }
+  33%  { transform: translate(-20px, -12px) rotate(-4deg); }
+  66%  { transform: translate(-8px, 12px) rotate(6deg); }
+  100% { transform: translate(0, 0) rotate(4deg); }
+}
+
+@keyframes butterfly-wing {
+  0%, 100% { transform: scaleX(1); }
+  50%      { transform: scaleX(0.7); }
+}
+
+.butterfly-a {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: butterfly-a 7s ease-in-out infinite;
+}
+
+.butterfly-b {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: butterfly-b 9s ease-in-out infinite;
+}
+
+.butterfly-wing {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: butterfly-wing 0.4s ease-in-out infinite;
+}
+
+@keyframes mascot-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+@keyframes mascot-wave {
+  0%, 100% { transform: rotate(-12deg); }
+  50%      { transform: rotate(22deg); }
+}
+
+.mascot-body {
+  animation: mascot-bob 3s ease-in-out infinite;
+}
+
+.mascot-claw {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: mascot-wave 2.2s ease-in-out infinite;
+}
+
+@keyframes mascot-heart {
+  0%, 100% { transform: scale(0.85) translateY(0); opacity: 0.6; }
+  50%      { transform: scale(1.1) translateY(-3px); opacity: 1; }
+}
+
+.mascot-heart {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: mascot-heart 1.8s ease-in-out infinite;
+}
+
+@keyframes leaf-float {
+  0%, 100% { transform: translate(0, 0) rotate(-4deg); }
+  50%      { transform: translate(10px, -14px) rotate(6deg); }
+}
+
+.leaf-float         { animation: leaf-float 10s ease-in-out infinite; }
+.leaf-float.delay-1 { animation-delay: 1.8s; }
+.leaf-float.delay-2 { animation-delay: 3.6s; }
+
+.dot-grid {
+  background-image: radial-gradient(circle at 1px 1px, rgba(70, 106, 61, 0.09) 1px, transparent 0);
+  background-size: 28px 28px;
+  background-position: 0 0;
+}
+
+.sun-burst-small {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(246, 203, 112, 0.35) 0deg 6deg,
+    transparent 6deg 16deg
+  );
+  -webkit-mask: radial-gradient(circle, rgba(0, 0, 0, 0.9) 20%, transparent 65%);
+  mask: radial-gradient(circle, rgba(0, 0, 0, 0.9) 20%, transparent 65%);
+  animation: rays-rotate 120s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-gentle,
+  .sun-glow,
+  .sun-rays-svg,
+  .sparkle,
+  .butterfly-a,
+  .butterfly-b,
+  .butterfly-wing,
+  .leaf-float,
+  .sun-burst-small,
+  .mascot-body,
+  .mascot-claw,
+  .mascot-heart {
+    animation: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .carousel-track {
+    transition: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.announcement-body p {
+  margin-bottom: 0.75rem;
+}
+
+.announcement-body p:last-child {
+  margin-bottom: 0;
+}
+
+.announcement-body a {
+  color: #385434;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.announcement-body a:hover {
+  color: #293827;
+}
+
+.announcement-body ul,
+.announcement-body ol {
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.announcement-body ul {
+  list-style: disc;
+}
+
+.announcement-body ol {
+  list-style: decimal;
+}
+
+.announcement-body li {
+  margin-bottom: 0.25rem;
+}
+
+.announcement-body strong {
+  color: #293827;
+  font-weight: 600;
+}
+
+.announcement-body em {
+  font-style: italic;
+}
+
+.announcement-body code {
+  background: #f3f7f1;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}

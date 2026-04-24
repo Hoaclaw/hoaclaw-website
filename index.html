@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HOAClaw — The virtual HOA manager</title>
+  <meta name="description" content="HOAClaw is an AI-powered HOA management platform. A cluster of purpose-built agents handles violations, dues, vendors, and resident communications — so your board can focus on the community.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sage: {
+              50:  '#f3f7f1',
+              100: '#e4eedf',
+              200: '#c9ddc0',
+              300: '#a4c398',
+              400: '#7ba46e',
+              500: '#5c8651',
+              600: '#466a3d',
+              700: '#385434',
+              800: '#30432d',
+              900: '#293827',
+            },
+            cream: '#FAF7F0',
+            coral: {
+              DEFAULT: '#E07856',
+              light:   '#F0A487',
+              dark:    '#C05E3D',
+            },
+            warm: '#F5E9D0',
+            sky2: '#B8D4E0',
+          },
+          fontFamily: {
+            display: ['"Fraunces"', 'ui-serif', 'serif'],
+            sans:    ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          boxShadow: {
+            soft: '0 1px 2px rgba(40,60,35,0.04), 0 8px 24px -12px rgba(40,60,35,0.12)',
+          },
+        },
+      },
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <link rel="stylesheet" href="site.css">
+</head>
+<body class="bg-cream text-slate-800 font-sans antialiased">
+
+<header class="sticky top-0 z-40 bg-cream/85 backdrop-blur-md border-b border-sage-100">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2.5" aria-label="HOAClaw home">
+      <svg class="w-9 h-9" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <path d="M5 22 L20 7 L35 22 L35 34 L5 34 Z" fill="#466a3d" fill-opacity="0.12"/>
+        <path d="M5 22 L20 7 L35 22" stroke="#466a3d" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+        <path d="M8 22 V34 H32 V22" stroke="#466a3d" stroke-width="2.2" stroke-linejoin="round"/>
+        <path d="M20 16 C 23.5 17.5, 23.5 22, 20 24 C 16.5 22, 16.5 17.5, 20 16 Z" fill="#5c8651"/>
+        <line x1="20" y1="19" x2="20" y2="24" stroke="#2f5d3a" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      <span class="font-display text-2xl font-semibold text-sage-800 tracking-tight">HOAClaw</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+      <a href="#who" class="text-slate-700 hover:text-sage-700 transition">Who it's for</a>
+      <a href="#features" class="text-slate-700 hover:text-sage-700 transition">Features</a>
+      <a href="#news" class="text-slate-700 hover:text-sage-700 transition">News</a>
+      <a href="mailto:hello@hoaclaw.com?subject=HOAClaw%20demo%20request" class="bg-sage-600 text-white px-5 py-2.5 rounded-full hover:bg-sage-700 transition shadow-sm">Request demo</a>
+    </nav>
+    <button id="nav-toggle" class="md:hidden p-2 -mr-2" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-nav">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+  <div id="mobile-nav" class="hidden md:hidden border-t border-sage-100 bg-cream">
+    <div class="px-6 py-4 flex flex-col gap-4 text-sm font-medium">
+      <a href="#who" class="py-1">Who it's for</a>
+      <a href="#features" class="py-1">Features</a>
+      <a href="#news" class="py-1">News</a>
+      <a href="mailto:hello@hoaclaw.com?subject=HOAClaw%20demo%20request" class="bg-sage-600 text-white px-5 py-2.5 rounded-full text-center">Request demo</a>
+    </div>
+  </div>
+</header>
+
+<section class="relative overflow-hidden min-h-[640px] sm:min-h-[700px] md:min-h-[740px] lg:min-h-[820px]">
+  <div class="absolute inset-0 -z-10" aria-hidden="true">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" class="w-full h-full" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A sunny verdant neighborhood with four houses, rolling hills, trees, a family walking, butterflies and flowers">
+      <defs>
+        <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#E4EEF7"/>
+          <stop offset="100%" stop-color="#FAF7F0"/>
+        </linearGradient>
+        <linearGradient id="hillGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#B9D4AE"/>
+          <stop offset="100%" stop-color="#8EB47F"/>
+        </linearGradient>
+        <linearGradient id="grassGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#9CC08E"/>
+          <stop offset="100%" stop-color="#7BA96E"/>
+        </linearGradient>
+        <path id="hoaRay"      d="M 1050 8  L 1060 88 L 1040 88 Z"/>
+        <path id="hoaRayShort" d="M 1050 44 L 1058 88 L 1042 88 Z"/>
+        <pattern id="fencePost" x="0" y="0" width="48" height="34" patternUnits="userSpaceOnUse">
+          <rect x="0" y="0" width="4" height="34" fill="#D9C9A4"/>
+        </pattern>
+      </defs>
+
+      <rect width="1600" height="600" fill="url(#skyGrad)"/>
+
+      <g class="sun-rays-svg" fill="#F6CB70" opacity="0.55">
+        <use href="#hoaRay"/>
+        <use href="#hoaRayShort" transform="rotate(30 1050 160)"/>
+        <use href="#hoaRay"      transform="rotate(60 1050 160)"/>
+        <use href="#hoaRayShort" transform="rotate(90 1050 160)"/>
+        <use href="#hoaRay"      transform="rotate(120 1050 160)"/>
+        <use href="#hoaRayShort" transform="rotate(150 1050 160)"/>
+        <use href="#hoaRay"      transform="rotate(180 1050 160)"/>
+        <use href="#hoaRayShort" transform="rotate(210 1050 160)"/>
+        <use href="#hoaRay"      transform="rotate(240 1050 160)"/>
+        <use href="#hoaRayShort" transform="rotate(270 1050 160)"/>
+        <use href="#hoaRay"      transform="rotate(300 1050 160)"/>
+        <use href="#hoaRayShort" transform="rotate(330 1050 160)"/>
+      </g>
+
+      <circle cx="1050" cy="160" r="92" fill="#F7DC9D" opacity="0.5" class="sun-glow"/>
+      <circle cx="1050" cy="160" r="58" fill="#F6CB70"/>
+
+      <g fill="#FFFFFF">
+        <g transform="translate(940 108)">
+          <path class="sparkle" d="M 0 -7 Q 1.2 -1.2, 7 0 Q 1.2 1.2, 0 7 Q -1.2 1.2, -7 0 Q -1.2 -1.2, 0 -7 Z"/>
+        </g>
+        <g transform="translate(1165 112)">
+          <path class="sparkle sparkle-2" d="M 0 -5 Q 0.9 -0.9, 5 0 Q 0.9 0.9, 0 5 Q -0.9 0.9, -5 0 Q -0.9 -0.9, 0 -5 Z"/>
+        </g>
+        <g transform="translate(1172 238)">
+          <path class="sparkle sparkle-3" d="M 0 -6 Q 1 -1, 6 0 Q 1 1, 0 6 Q -1 1, -6 0 Q -1 -1, 0 -6 Z"/>
+        </g>
+        <g transform="translate(936 244)">
+          <path class="sparkle sparkle-4" d="M 0 -4 Q 0.6 -0.6, 4 0 Q 0.6 0.6, 0 4 Q -0.6 0.6, -4 0 Q -0.6 -0.6, 0 -4 Z"/>
+        </g>
+      </g>
+
+      <g fill="#FFFFFF" opacity="0.82">
+        <ellipse cx="220" cy="110" rx="54" ry="17"/>
+        <ellipse cx="252" cy="98"  rx="34" ry="14"/>
+        <ellipse cx="540" cy="88"  rx="42" ry="13"/>
+        <ellipse cx="830" cy="220" rx="44" ry="13"/>
+        <ellipse cx="1410" cy="130" rx="38" ry="12"/>
+        <ellipse cx="1452" cy="120" rx="24" ry="10"/>
+      </g>
+
+      <path d="M 360 210 Q 372 198, 384 210 Q 396 198, 408 210" stroke="#5A4A35" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <path d="M 472 248 Q 482 238, 492 248 Q 502 238, 512 248" stroke="#5A4A35" stroke-width="2"   fill="none" stroke-linecap="round"/>
+      <path d="M 720 170 Q 730 160, 740 170 Q 750 160, 760 170" stroke="#5A4A35" stroke-width="2"   fill="none" stroke-linecap="round"/>
+
+      <path d="M 0 500 Q 300 430, 600 460 Q 900 490, 1200 450 Q 1400 430, 1600 440 L 1600 680 L 0 680 Z" fill="#CDE0C2"/>
+      <path d="M 0 580 Q 400 540, 800 560 Q 1200 575, 1600 555 L 1600 680 L 0 680 Z" fill="url(#hillGrad)"/>
+
+      <g transform="translate(240 540)">
+        <ellipse cx="0" cy="-10" rx="28" ry="34" fill="#6C9A60"/>
+        <rect x="-4" y="22" width="8" height="22" fill="#5C3E2A"/>
+      </g>
+      <g transform="translate(930 500)">
+        <ellipse cx="0" cy="-10" rx="26" ry="32" fill="#618B56"/>
+        <rect x="-4" y="20" width="8" height="22" fill="#5C3E2A"/>
+      </g>
+      <g transform="translate(1270 490)">
+        <ellipse cx="0" cy="-10" rx="32" ry="38" fill="#6C9A60"/>
+        <rect x="-4" y="26" width="8" height="22" fill="#5C3E2A"/>
+      </g>
+      <g transform="translate(1500 500)">
+        <ellipse cx="0" cy="-10" rx="28" ry="34" fill="#618B56"/>
+        <rect x="-4" y="22" width="8" height="22" fill="#5C3E2A"/>
+      </g>
+
+      <g transform="translate(520 555)">
+        <rect x="0" y="55" width="108" height="70" fill="#E8A68A"/>
+        <path d="M -12 60 L 54 8 L 120 60 Z" fill="#C06850"/>
+        <path d="M -12 60 L 54 8 L 120 60" stroke="#8F4A38" stroke-width="2" fill="none" stroke-linejoin="round"/>
+        <rect x="45" y="78" width="26" height="47" fill="#7A4A35"/>
+        <circle cx="65" cy="103" r="1.8" fill="#D9A45B"/>
+        <rect x="12" y="78" width="20" height="22" fill="#FAF7F0" stroke="#7A4A35" stroke-width="1.5"/>
+        <line x1="22" y1="78" x2="22" y2="100" stroke="#7A4A35" stroke-width="1"/>
+        <line x1="12" y1="89" x2="32" y2="89" stroke="#7A4A35" stroke-width="1"/>
+        <rect x="82" y="78" width="20" height="22" fill="#FAF7F0" stroke="#7A4A35" stroke-width="1.5"/>
+        <line x1="92" y1="78" x2="92" y2="100" stroke="#7A4A35" stroke-width="1"/>
+        <line x1="82" y1="89" x2="102" y2="89" stroke="#7A4A35" stroke-width="1"/>
+        <rect x="82" y="18" width="14" height="26" fill="#B05A44"/>
+      </g>
+
+      <g transform="translate(700 510)">
+        <rect x="0" y="70" width="152" height="100" fill="#F5E9D0"/>
+        <path d="M -14 75 L 76 10 L 166 75 Z" fill="#D8A24D"/>
+        <path d="M -14 75 L 76 10 L 166 75" stroke="#6B4E2A" stroke-width="2" fill="none" stroke-linejoin="round"/>
+        <path d="M 60 170 L 60 115 A 16 16 0 0 1 92 115 L 92 170 Z" fill="#7A4A35"/>
+        <circle cx="84" cy="143" r="2" fill="#D9A45B"/>
+        <rect x="52" y="170" width="48" height="6" fill="#E2C99B"/>
+        <rect x="18" y="98" width="26" height="28" fill="#B8D4E0" stroke="#6B4E2A" stroke-width="1.5"/>
+        <line x1="31" y1="98" x2="31" y2="126" stroke="#6B4E2A" stroke-width="1"/>
+        <line x1="18" y1="112" x2="44" y2="112" stroke="#6B4E2A" stroke-width="1"/>
+        <rect x="108" y="98" width="26" height="28" fill="#B8D4E0" stroke="#6B4E2A" stroke-width="1.5"/>
+        <line x1="121" y1="98" x2="121" y2="126" stroke="#6B4E2A" stroke-width="1"/>
+        <line x1="108" y1="112" x2="134" y2="112" stroke="#6B4E2A" stroke-width="1"/>
+        <rect x="66" y="48" width="20" height="22" fill="#B8D4E0" stroke="#6B4E2A" stroke-width="1.5"/>
+        <line x1="76" y1="48" x2="76" y2="70" stroke="#6B4E2A" stroke-width="1"/>
+        <rect x="120" y="24" width="14" height="30" fill="#C88B44"/>
+      </g>
+
+      <g transform="translate(1080 560)">
+        <rect x="0" y="50" width="100" height="70" fill="#A9C5A0"/>
+        <path d="M -12 55 L 50 8 L 112 55 Z" fill="#6F9266"/>
+        <path d="M -12 55 L 50 8 L 112 55" stroke="#3D5238" stroke-width="2" fill="none" stroke-linejoin="round"/>
+        <rect x="40" y="72" width="24" height="48" fill="#5A4A35"/>
+        <circle cx="59" cy="98" r="1.8" fill="#D9A45B"/>
+        <rect x="10" y="72" width="20" height="22" fill="#FAF7F0" stroke="#3D5238" stroke-width="1.5"/>
+        <line x1="20" y1="72" x2="20" y2="94" stroke="#3D5238" stroke-width="1"/>
+        <line x1="10" y1="83" x2="30" y2="83" stroke="#3D5238" stroke-width="1"/>
+        <rect x="72" y="72" width="20" height="22" fill="#FAF7F0" stroke="#3D5238" stroke-width="1.5"/>
+        <line x1="82" y1="72" x2="82" y2="94" stroke="#3D5238" stroke-width="1"/>
+        <line x1="72" y1="83" x2="92" y2="83" stroke="#3D5238" stroke-width="1"/>
+        <rect x="82" y="20" width="12" height="24" fill="#809A78"/>
+      </g>
+
+      <g transform="translate(1380 580)">
+        <rect x="0" y="45" width="82" height="55" fill="#F1DBB0"/>
+        <path d="M -10 50 L 41 10 L 92 50 Z" fill="#B85F44"/>
+        <path d="M -10 50 L 41 10 L 92 50" stroke="#6B4E2A" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
+        <rect x="33" y="60" width="20" height="40" fill="#6B4E2A"/>
+        <circle cx="49" cy="82" r="1.4" fill="#D9A45B"/>
+        <rect x="10" y="60" width="14" height="16" fill="#B8D4E0" stroke="#6B4E2A" stroke-width="1.2"/>
+        <rect x="58" y="60" width="14" height="16" fill="#B8D4E0" stroke="#6B4E2A" stroke-width="1.2"/>
+      </g>
+
+      <rect y="680" width="1600" height="220" fill="url(#grassGrad)"/>
+
+      <g transform="translate(1560 732)">
+        <circle cx="0" cy="0" r="26" fill="#5F8C57"/>
+        <circle cx="28" cy="6" r="18" fill="#6A9960"/>
+        <circle cx="-22" cy="6" r="16" fill="#6A9960"/>
+      </g>
+      <g transform="translate(420 740)">
+        <circle cx="0" cy="0" r="18" fill="#6A9960"/>
+        <circle cx="22" cy="4" r="14" fill="#5F8C57"/>
+      </g>
+
+      <rect x="0" y="744" width="540" height="32" fill="url(#fencePost)"/>
+      <rect x="0" y="748" width="540" height="5" fill="#D9C9A4"/>
+      <rect x="760" y="744" width="840" height="32" fill="url(#fencePost)"/>
+      <rect x="760" y="748" width="840" height="5" fill="#D9C9A4"/>
+
+      <path d="M 560 900 Q 610 820, 640 700 L 700 700 Q 690 820, 720 900 Z" fill="#E9D8B5"/>
+
+      <g transform="translate(150 800)">
+        <rect x="-8" y="0" width="16" height="100" fill="#5C3E2A"/>
+        <circle cx="0" cy="-30" r="55" fill="#538342"/>
+        <circle cx="-36" cy="-6" r="34" fill="#5F9050"/>
+        <circle cx="36" cy="-6" r="34" fill="#4F7D40"/>
+        <circle cx="0" cy="-62" r="30" fill="#618E52"/>
+        <circle cx="-18" cy="-48" r="20" fill="#538342"/>
+      </g>
+
+      <g transform="translate(480 728)">
+        <rect x="-3" y="-4" width="6" height="52" fill="#5C3E2A"/>
+        <path d="M -18 -4 L -18 -22 A 18 18 0 0 1 18 -22 L 18 -4 Z" fill="#C06850"/>
+        <path d="M -18 -4 L -18 -22 A 18 18 0 0 1 18 -22 L 18 -4" stroke="#8F4A38" stroke-width="1.5" fill="none"/>
+        <rect x="-7" y="-17" width="14" height="11" fill="#8F4A38" rx="1"/>
+        <circle cx="4" cy="-12" r="1" fill="#D9A45B"/>
+        <rect x="-24" y="-19" width="2" height="15" fill="#5C3E2A"/>
+        <path d="M -22 -19 L -14 -17 L -22 -14 Z" fill="#E07856"/>
+      </g>
+
+      <g transform="translate(840 840)">
+        <circle cx="0" cy="0" r="4" fill="#F0A487"/>
+        <circle cx="0" cy="0" r="1" fill="#D9A45B"/>
+        <circle cx="10" cy="-3" r="3.5" fill="#F6CB70"/>
+        <circle cx="-8" cy="5" r="3.5" fill="#E898B0"/>
+        <circle cx="6" cy="10" r="3" fill="#F0A487"/>
+      </g>
+      <g transform="translate(1200 860)">
+        <circle cx="0" cy="0" r="3.5" fill="#D9A45B"/>
+        <circle cx="10" cy="4" r="3.5" fill="#E07856"/>
+        <circle cx="-8" cy="5" r="3" fill="#E898B0"/>
+      </g>
+      <g transform="translate(380 864)">
+        <circle cx="0" cy="0" r="3.5" fill="#F6CB70"/>
+        <circle cx="12" cy="-4" r="3.5" fill="#E898B0"/>
+        <circle cx="-9" cy="6" r="3.5" fill="#F0A487"/>
+        <circle cx="20" cy="4" r="3" fill="#E07856"/>
+      </g>
+      <g transform="translate(1440 848)">
+        <circle cx="0" cy="0" r="3" fill="#E07856"/>
+        <circle cx="10" cy="3" r="3" fill="#F6CB70"/>
+      </g>
+
+      <g transform="translate(680 320)">
+        <g class="butterfly-a">
+          <path d="M 0 0 Q -13 -11, -11 -2 Q -9 4, 0 2 Z" fill="#E07856"/>
+          <path d="M 0 0 Q 13 -11, 11 -2 Q 9 4, 0 2 Z" fill="#E07856"/>
+          <path d="M 0 2 Q -11 7, -6 11 Q -3 11, 0 3 Z" fill="#F0A487"/>
+          <path d="M 0 2 Q 11 7, 6 11 Q 3 11, 0 3 Z" fill="#F0A487"/>
+          <ellipse cx="0" cy="2" rx="1.2" ry="6.5" fill="#2F3F2A"/>
+          <circle cx="-1.2" cy="-3.5" r="0.7" fill="#FAF7F0"/>
+          <circle cx="1.2" cy="-3.5" r="0.7" fill="#FAF7F0"/>
+        </g>
+      </g>
+
+      <g transform="translate(1270 720)">
+        <g class="butterfly-b">
+          <path d="M 0 0 Q -11 -9, -9 -1 Q -7 3, 0 2 Z" fill="#D9A45B"/>
+          <path d="M 0 0 Q 11 -9, 9 -1 Q 7 3, 0 2 Z" fill="#D9A45B"/>
+          <path d="M 0 2 Q -9 5, -5 8 Q -3 8, 0 3 Z" fill="#F6CB70"/>
+          <path d="M 0 2 Q 9 5, 5 8 Q 3 8, 0 3 Z" fill="#F6CB70"/>
+          <ellipse cx="0" cy="2" rx="1" ry="5.5" fill="#2F3F2A"/>
+        </g>
+      </g>
+
+      <g transform="translate(440 820)">
+        <g class="butterfly-a">
+          <path d="M 0 0 Q -10 -7, -8 -1 Q -6 3, 0 2 Z" fill="#E898B0"/>
+          <path d="M 0 0 Q 10 -7, 8 -1 Q 6 3, 0 2 Z" fill="#E898B0"/>
+          <path d="M 0 2 Q -8 5, -5 8 Q -3 8, 0 3 Z" fill="#F0A487"/>
+          <path d="M 0 2 Q 8 5, 5 8 Q 3 8, 0 3 Z" fill="#F0A487"/>
+          <ellipse cx="0" cy="2" rx="0.9" ry="5" fill="#2F3F2A"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="absolute inset-0 bg-gradient-to-r from-cream/50 via-cream/10 to-transparent pointer-events-none" aria-hidden="true"></div>
+
+  <div class="relative max-w-7xl mx-auto px-6 py-20 md:py-28 lg:py-32">
+    <div class="max-w-xl reveal">
+      <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-sm border border-sage-200 text-sage-700 text-xs font-semibold mb-6 shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-coral"></span>
+        The virtual HOA manager
+      </span>
+      <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl leading-[1.05] text-sage-900 font-semibold mb-6 tracking-tight">
+        Your community, <span class="italic text-coral">quietly</span> running itself.
+      </h1>
+      <p class="text-lg text-slate-700 mb-8 leading-relaxed max-w-lg">
+        HOAClaw is a cluster of AI agents that handle violations, dues, vendors, and resident questions — so your board can stop chasing paperwork and get back to neighbors.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a href="mailto:hello@hoaclaw.com?subject=HOAClaw%20demo%20request" class="bg-sage-600 text-white px-6 py-3 rounded-full font-medium hover:bg-sage-700 transition shadow-md">Request a demo</a>
+        <a href="#features" class="bg-white/90 backdrop-blur-sm border border-sage-200 text-sage-800 px-6 py-3 rounded-full font-medium hover:bg-white transition shadow-sm">See what it does</a>
+      </div>
+      <div class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-600">
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-sage-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Built for boards, not lawyers
+        </div>
+        <div class="flex items-center gap-2">
+          <svg class="w-5 h-5 text-sage-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          You approve, it acts
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <svg class="absolute bottom-0 left-0 right-0 w-full block pointer-events-none" viewBox="0 0 1440 40" preserveAspectRatio="none" style="height:18px" aria-hidden="true">
+    <path fill="#f3f7f1" d="M0,20 C240,40 480,6 720,20 C960,34 1200,8 1440,26 L1440,40 L0,40 Z"/>
+  </svg>
+</section>
+
+<section id="who" class="relative overflow-hidden bg-sage-50 py-20 md:py-24">
+  <svg class="absolute -top-10 -left-10 w-56 h-56 opacity-40 pointer-events-none" viewBox="0 0 200 200" aria-hidden="true">
+    <path d="M 20 180 Q 90 130, 180 20" stroke="#5C8651" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <g fill="#7BA46E">
+      <ellipse cx="40" cy="160" rx="18" ry="8" transform="rotate(-35 40 160)"/>
+      <ellipse cx="70" cy="135" rx="22" ry="10" transform="rotate(-40 70 135)"/>
+      <ellipse cx="100" cy="105" rx="24" ry="11" transform="rotate(-45 100 105)"/>
+      <ellipse cx="130" cy="75" rx="22" ry="10" transform="rotate(-50 130 75)"/>
+      <ellipse cx="160" cy="45" rx="18" ry="9" transform="rotate(-55 160 45)"/>
+    </g>
+    <g fill="#5C8651">
+      <ellipse cx="55" cy="150" rx="15" ry="7" transform="rotate(55 55 150)"/>
+      <ellipse cx="85" cy="120" rx="19" ry="9" transform="rotate(50 85 120)"/>
+      <ellipse cx="115" cy="90" rx="21" ry="9" transform="rotate(48 115 90)"/>
+      <ellipse cx="145" cy="60" rx="18" ry="8" transform="rotate(45 145 60)"/>
+    </g>
+  </svg>
+  <svg class="absolute -bottom-16 -right-10 w-64 h-64 opacity-30 pointer-events-none" viewBox="0 0 200 200" aria-hidden="true">
+    <path d="M 180 180 Q 110 130, 20 20" stroke="#466a3d" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <g fill="#5C8651">
+      <ellipse cx="160" cy="160" rx="18" ry="8" transform="rotate(35 160 160)"/>
+      <ellipse cx="130" cy="135" rx="22" ry="10" transform="rotate(40 130 135)"/>
+      <ellipse cx="100" cy="105" rx="24" ry="11" transform="rotate(45 100 105)"/>
+      <ellipse cx="70" cy="75" rx="22" ry="10" transform="rotate(50 70 75)"/>
+      <ellipse cx="40" cy="45" rx="18" ry="9" transform="rotate(55 40 45)"/>
+    </g>
+    <g fill="#7BA46E">
+      <ellipse cx="145" cy="150" rx="15" ry="7" transform="rotate(-55 145 150)"/>
+      <ellipse cx="115" cy="120" rx="19" ry="9" transform="rotate(-50 115 120)"/>
+      <ellipse cx="85" cy="90" rx="21" ry="9" transform="rotate(-48 85 90)"/>
+      <ellipse cx="55" cy="60" rx="18" ry="8" transform="rotate(-45 55 60)"/>
+    </g>
+  </svg>
+  <div class="max-w-7xl mx-auto px-6 relative">
+    <div class="text-center max-w-2xl mx-auto mb-14 reveal">
+      <span class="text-sage-700 font-semibold text-sm uppercase tracking-wider">For everyone in the community</span>
+      <h2 class="font-display text-3xl md:text-4xl text-sage-900 font-semibold mt-3 mb-4 tracking-tight">Built around people, not paperwork.</h2>
+      <p class="text-slate-600 text-lg">Every stakeholder has different needs. HOAClaw gives each one the right surface — and stays out of the way of the rest.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="bg-white rounded-2xl border border-sage-100 p-7 shadow-soft reveal hover:-translate-y-1 transition-transform">
+        <div class="w-12 h-12 rounded-xl bg-coral/10 text-coral flex items-center justify-center mb-5">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M3 12l9-9 9 9v9a2 2 0 01-2 2h-4v-6h-6v6H5a2 2 0 01-2-2z" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold text-sage-900 mb-2">Homeowners</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Text a question, get a real answer — grounded in your community's rules, not a generic FAQ.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-sage-100 p-7 shadow-soft reveal hover:-translate-y-1 transition-transform">
+        <div class="w-12 h-12 rounded-xl bg-sage-100 text-sage-700 flex items-center justify-center mb-5">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m3 5.87V17a4 4 0 10-8 0v3m16 0v-3a4 4 0 10-8 0v3M13 7a3 3 0 11-6 0 3 3 0 016 0zm8 0a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold text-sage-900 mb-2">Board members</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Less paperwork, clearer decisions. Approve what matters; the agents handle the rest.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-sage-100 p-7 shadow-soft reveal hover:-translate-y-1 transition-transform">
+        <div class="w-12 h-12 rounded-xl bg-sage-100 text-sage-700 flex items-center justify-center mb-5">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold text-sage-900 mb-2">Property managers</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Scale across communities without scaling headcount. One command center, every HOA.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-sage-100 p-7 shadow-soft reveal hover:-translate-y-1 transition-transform">
+        <div class="w-12 h-12 rounded-xl bg-coral/10 text-coral flex items-center justify-center mb-5">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold text-sage-900 mb-2">Vendors</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Clear dispatches, simple invoicing, and a reminder before your COI expires. No new app required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="relative overflow-hidden py-20 md:py-28 bg-cream">
+  <div class="absolute inset-0 dot-grid pointer-events-none" aria-hidden="true"></div>
+  <div class="absolute top-20 -right-20 w-80 h-80 sun-burst-small rounded-full opacity-60 pointer-events-none" aria-hidden="true"></div>
+  <svg class="absolute bottom-24 -left-10 w-40 h-40 opacity-25 pointer-events-none" viewBox="0 0 200 200" aria-hidden="true">
+    <path d="M 20 180 Q 90 130, 180 20" stroke="#466a3d" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <g fill="#7BA46E">
+      <ellipse cx="50" cy="160" rx="16" ry="7" transform="rotate(-35 50 160)"/>
+      <ellipse cx="80" cy="135" rx="20" ry="9" transform="rotate(-40 80 135)"/>
+      <ellipse cx="110" cy="105" rx="22" ry="10" transform="rotate(-45 110 105)"/>
+      <ellipse cx="140" cy="75" rx="20" ry="9" transform="rotate(-50 140 75)"/>
+    </g>
+  </svg>
+  <div class="max-w-7xl mx-auto px-6 relative">
+    <div class="text-center max-w-2xl mx-auto mb-16 reveal">
+      <span class="text-sage-700 font-semibold text-sm uppercase tracking-wider">A cluster of agents</span>
+      <h2 class="font-display text-3xl md:text-4xl text-sage-900 font-semibold mt-3 mb-4 tracking-tight">Specialists for every corner of HOA life.</h2>
+      <p class="text-slate-600 text-lg">Each agent is purpose-built for a domain. They share context, hand off cleanly, and ask before doing anything irreversible.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div class="group relative bg-white border border-sage-100 rounded-2xl p-7 shadow-soft reveal">
+        <div class="w-12 h-12 rounded-xl bg-sage-600 text-white flex items-center justify-center mb-5">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.76 9.76 0 01-4-.8L3 20l1.3-3.8A7.94 7.94 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold text-sage-900 mb-2">Resident Communications</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Answers resident questions over email, SMS, or WhatsApp — grounded in your CC&Rs, bylaws, and meeting minutes.</p>
+      </div>
+
+      <div class="group relative bg-white border border-sage-100 rounded-2xl p-7 shadow-soft reveal">
+        <div class="w-12 h-12 rounded-xl bg-sage-600 text-white flex items-center justify-center mb-5">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold text-sage-900 mb-2">Violation Workflow</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Drafts notices, tracks cure deadlines, schedules hearings — with board approval at every escalation.</p>
+      </div>
+
+      <div class="group relative bg-white border border-sage-100 rounded-2xl p-7 shadow-soft reveal">
+        <div class="w-12 h-12 rounded-xl bg-sage-600 text-white flex items-center justify-center mb-5">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold text-sage-900 mb-2">Dues &amp; Collections</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Sends reminders, calculates late fees per your governing docs, and negotiates payment plans before escalation.</p>
+      </div>
+
+      <div class="group relative bg-white border border-sage-100 rounded-2xl p-7 shadow-soft reveal">
+        <div class="w-12 h-12 rounded-xl bg-sage-600 text-white flex items-center justify-center mb-5">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold text-sage-900 mb-2">Work Orders &amp; Vendors</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Routes maintenance requests to the right vendor, tracks SLAs, and keeps COIs and licenses current.</p>
+      </div>
+
+      <div class="group relative bg-white border border-sage-100 rounded-2xl p-7 shadow-soft reveal">
+        <div class="w-12 h-12 rounded-xl bg-sage-600 text-white flex items-center justify-center mb-5">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold text-sage-900 mb-2">Governance &amp; Meetings</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Drafts agendas, sends legally-compliant notices, transcribes meetings, and manages elections end-to-end.</p>
+      </div>
+
+      <div class="group relative bg-white border border-sage-100 rounded-2xl p-7 shadow-soft reveal">
+        <div class="w-12 h-12 rounded-xl bg-sage-600 text-white flex items-center justify-center mb-5">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3 class="font-display text-xl font-semibold text-sage-900 mb-2">Board Reporting</h3>
+        <p class="text-slate-600 text-sm leading-relaxed">Monthly packets, variance reports, delinquency trends — written in plain English for non-technical board members.</p>
+      </div>
+    </div>
+
+    <div class="mt-16 bg-gradient-to-br from-sage-600 to-sage-700 rounded-3xl p-8 md:p-12 text-white grid md:grid-cols-2 gap-10 items-center reveal">
+      <div>
+        <h3 class="font-display text-2xl md:text-3xl font-semibold mb-4 tracking-tight">You stay in control.</h3>
+        <p class="text-sage-50 leading-relaxed">Low-stakes tasks — reminders, routing, document retrieval — happen on their own. Anything with real consequences (violation notices, liens, special assessments) lands in your approval queue first. Graduated autonomy, by design.</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3 text-sm">
+        <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+          <div class="font-semibold mb-1">Agents act</div>
+          <div class="text-sage-100 text-xs">Payment reminders · Work order routing · COI tracking</div>
+        </div>
+        <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+          <div class="font-semibold mb-1">Humans approve</div>
+          <div class="text-sage-100 text-xs">Violation notices · Fines · Liens · Budgets</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="news" class="relative overflow-hidden bg-sage-50 py-20 md:py-24">
+  <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 sun-burst-small rounded-full opacity-40 pointer-events-none" aria-hidden="true"></div>
+  <svg class="absolute bottom-16 right-8 w-14 h-14 opacity-50 leaf-float delay-2 pointer-events-none" viewBox="0 0 60 60" fill="#7BA46E" aria-hidden="true">
+    <path d="M 30 6 C 14 14, 6 32, 8 52 C 26 50, 48 34, 54 10 C 46 14, 38 14, 30 6 Z"/>
+    <path d="M 30 6 C 28 22, 20 38, 8 52" stroke="#385434" stroke-width="1" fill="none" stroke-linecap="round"/>
+  </svg>
+  <div class="max-w-5xl mx-auto px-6 relative">
+    <div class="text-center max-w-2xl mx-auto mb-12 reveal">
+      <span class="text-sage-700 font-semibold text-sm uppercase tracking-wider">Latest news</span>
+      <h2 class="font-display text-3xl md:text-4xl text-sage-900 font-semibold mt-3 mb-4 tracking-tight">What's new at HOAClaw.</h2>
+      <p class="text-slate-600 text-lg">Product updates, partnerships, and a peek at what's next.</p>
+    </div>
+
+    <div id="announce-wrap" class="relative reveal">
+      <div class="overflow-hidden rounded-3xl">
+        <div id="announce-track" class="carousel-track">
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mt-6 gap-4">
+        <button id="announce-prev" class="w-11 h-11 rounded-full bg-white border border-sage-200 text-sage-700 flex items-center justify-center hover:bg-sage-100 transition shadow-sm" aria-label="Previous announcement">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <div id="announce-dots" class="flex items-center gap-2" role="tablist" aria-label="Announcement pagination"></div>
+
+        <button id="announce-next" class="w-11 h-11 rounded-full bg-white border border-sage-200 text-sage-700 flex items-center justify-center hover:bg-sage-100 transition shadow-sm" aria-label="Next announcement">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="announce-empty" class="hidden text-center py-16 px-8 bg-white rounded-3xl border border-sage-100">
+      <svg class="w-12 h-12 mx-auto text-sage-300 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+        <path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p class="text-slate-500">No announcements yet. Check back soon.</p>
+    </div>
+  </div>
+</section>
+
+<section class="py-20 md:py-24">
+  <div class="max-w-4xl mx-auto px-6">
+    <div class="relative bg-white border border-sage-100 rounded-3xl p-10 md:p-14 shadow-soft overflow-hidden reveal">
+      <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-sage-100 opacity-50 blur-2xl" aria-hidden="true"></div>
+      <div class="absolute -bottom-24 -left-20 w-72 h-72 rounded-full bg-coral/10 blur-2xl" aria-hidden="true"></div>
+      <div class="absolute -top-16 -right-16 w-56 h-56 sun-burst-small rounded-full opacity-50 pointer-events-none" aria-hidden="true"></div>
+      <svg class="absolute bottom-6 right-6 w-10 h-10 opacity-40 leaf-float pointer-events-none" viewBox="0 0 40 40" fill="#7BA46E" aria-hidden="true">
+        <path d="M 20 4 C 10 12, 6 24, 8 34 C 20 32, 32 22, 34 6 C 30 10, 24 11, 20 4 Z"/>
+      </svg>
+      <div class="relative text-center">
+        <h2 class="font-display text-3xl md:text-4xl text-sage-900 font-semibold mb-4 tracking-tight">See HOAClaw running your community.</h2>
+        <p class="text-slate-600 text-lg mb-8 max-w-xl mx-auto">A 30-minute walk-through with your CC&amp;Rs loaded in. No slides — just the agents, doing the work.</p>
+        <a href="mailto:hello@hoaclaw.com?subject=HOAClaw%20demo%20request&body=Hi%20HOAClaw%20team%2C%0A%0AI'd%20like%20to%20see%20a%20demo.%0A%0ACommunity%20name%3A%0ANumber%20of%20units%3A%0AState%3A%0A%0AThanks%21" class="inline-flex items-center gap-2 bg-sage-600 text-white px-7 py-3.5 rounded-full font-medium hover:bg-sage-700 transition shadow-sm">
+          Request a demo
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14m-7-7l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <p class="text-sm text-slate-500 mt-5">Or write us at <a href="mailto:hello@hoaclaw.com" class="text-sage-700 underline underline-offset-2">hello@hoaclaw.com</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="bg-sage-900 text-sage-100">
+  <div class="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-4 gap-10">
+    <div class="md:col-span-2">
+      <div class="flex items-center gap-2.5 mb-4">
+        <svg class="w-9 h-9" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <path d="M5 22 L20 7 L35 22 L35 34 L5 34 Z" fill="#ffffff" fill-opacity="0.08"/>
+          <path d="M5 22 L20 7 L35 22" stroke="#e4eedf" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M8 22 V34 H32 V22" stroke="#e4eedf" stroke-width="2.2" stroke-linejoin="round"/>
+          <path d="M20 16 C 23.5 17.5, 23.5 22, 20 24 C 16.5 22, 16.5 17.5, 20 16 Z" fill="#a4c398"/>
+        </svg>
+        <span class="font-display text-2xl font-semibold text-white">HOAClaw</span>
+      </div>
+      <p class="text-sage-200 max-w-sm leading-relaxed">The virtual HOA manager. A cluster of AI agents that runs the paperwork so your board can run the community.</p>
+    </div>
+    <div>
+      <h4 class="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Product</h4>
+      <ul class="space-y-2 text-sm">
+        <li><a href="#who" class="hover:text-white transition">Who it's for</a></li>
+        <li><a href="#features" class="hover:text-white transition">Features</a></li>
+        <li><a href="#news" class="hover:text-white transition">News</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Contact</h4>
+      <ul class="space-y-2 text-sm">
+        <li><a href="mailto:hello@hoaclaw.com" class="hover:text-white transition">hello@hoaclaw.com</a></li>
+        <li><a href="mailto:hello@hoaclaw.com?subject=HOAClaw%20demo%20request" class="hover:text-white transition">Request a demo</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-sage-800">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between text-xs text-sage-300 gap-2">
+      <span>&copy; 2026 HOAClaw. All rights reserved.</span>
+      <span>Made with care for the people who keep communities running.</span>
+    </div>
+  </div>
+</footer>
+
+<a href="mailto:hello@hoaclaw.com?subject=HOAClaw%20demo%20request" class="mascot-pinned group fixed bottom-5 right-5 md:bottom-6 md:right-6 z-30 w-24 h-24 md:w-28 md:h-28 hover:scale-110 transition-transform duration-300" aria-label="Say hi — request a demo">
+  <span class="sr-only">Request a demo</span>
+  <svg viewBox="-64 -52 128 112" class="w-full h-full drop-shadow-[0_8px_14px_rgba(40,60,35,0.25)]" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g class="mascot-body">
+      <ellipse cx="0" cy="50" rx="46" ry="5" fill="#1a2818" opacity="0.18"/>
+
+      <g transform="translate(18 18)">
+        <path d="M 0 -4 Q 26 -4, 32 12 Q 28 30, 6 28 Z" fill="#C05E3D"/>
+        <path d="M 0 -2 Q 20 -1, 28 12" stroke="#8F3A25" stroke-width="1" fill="none" opacity="0.55"/>
+        <path d="M 2 10 Q 20 12, 28 20"  stroke="#8F3A25" stroke-width="1" fill="none" opacity="0.55"/>
+        <path d="M 4 20 Q 18 24, 26 26"  stroke="#8F3A25" stroke-width="1" fill="none" opacity="0.55"/>
+      </g>
+
+      <ellipse cx="0" cy="16" rx="24" ry="20" fill="#E07856"/>
+      <ellipse cx="0" cy="14" rx="21" ry="16" fill="#F0A487"/>
+
+      <path d="M -18 6 Q 0 12, 18 6"   stroke="#C05E3D" stroke-width="0.8" fill="none" opacity="0.5"/>
+      <path d="M -20 16 Q 0 22, 20 16" stroke="#C05E3D" stroke-width="0.8" fill="none" opacity="0.5"/>
+
+      <path d="M -9 0 Q -24 -20, -28 -34" stroke="#C05E3D" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M  9 0 Q  24 -20,  28 -34" stroke="#C05E3D" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="-28" cy="-34" r="1.8" fill="#C05E3D"/>
+      <circle cx="28"  cy="-34" r="1.8" fill="#C05E3D"/>
+
+      <circle cx="-9" cy="6" r="6.5" fill="#FAF7F0" stroke="#C05E3D" stroke-width="0.6"/>
+      <circle cx="9"  cy="6" r="6.5" fill="#FAF7F0" stroke="#C05E3D" stroke-width="0.6"/>
+      <circle cx="-8" cy="7" r="3.2" fill="#2F3F2A"/>
+      <circle cx="10" cy="7" r="3.2" fill="#2F3F2A"/>
+      <circle cx="-7" cy="6" r="1.2" fill="#FFFFFF"/>
+      <circle cx="11" cy="6" r="1.2" fill="#FFFFFF"/>
+
+      <ellipse cx="-16" cy="16" rx="3.5" ry="2.2" fill="#F08070" opacity="0.55"/>
+      <ellipse cx="16"  cy="16" rx="3.5" ry="2.2" fill="#F08070" opacity="0.55"/>
+
+      <path d="M -5 18 Q 0 24, 5 18" stroke="#2F3F2A" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M -4 20 Q 0 22.5, 4 20 Q 3 22, 0 23 Q -3 22, -4 20 Z" fill="#D14560" opacity="0.7"/>
+
+      <path d="M 22 18 Q 30 28, 34 38" stroke="#E07856" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <g transform="translate(34 40)">
+        <path d="M 0 0 Q 10 -4, 14 2 Q 14 10, 6 12 Q 0 12, -4 8 Q -8 0, -2 -6 Z" fill="#E07856"/>
+        <path d="M 4 2 L 0 -2" stroke="#C05E3D" stroke-width="0.8" fill="none"/>
+        <circle cx="8" cy="2" r="1" fill="#C05E3D" opacity="0.4"/>
+      </g>
+
+      <path d="M -22 14 Q -32 2, -40 -14" stroke="#E07856" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <g transform="translate(-40 -14)">
+        <g class="mascot-claw">
+          <path d="M 0 0 Q -12 -10, -16 -2 Q -14 6, -4 6 Q 2 10, 6 4 Q 12 -4, 2 -12 Z" fill="#E07856"/>
+          <path d="M -2 -2 L 0 0 L 2 -2" stroke="#C05E3D" stroke-width="0.8" fill="none"/>
+          <circle cx="-9" cy="-3" r="1" fill="#C05E3D" opacity="0.4"/>
+        </g>
+      </g>
+
+      <g stroke="#C05E3D" stroke-width="2" fill="none" stroke-linecap="round">
+        <path d="M -14 32 L -16 42"/>
+        <path d="M -5  34 L -6  44"/>
+        <path d="M 5   34 L 6   44"/>
+        <path d="M 14  32 L 16  42"/>
+      </g>
+
+      <g transform="translate(-52 -32)" opacity="0.9">
+        <g class="mascot-heart">
+          <path d="M 0 -4 C -3 -8, -6 -8, -6 -4 C -6 -2, -3 0, 0 2 C 3 0, 6 -2, 6 -4 C 6 -8, 3 -8, 0 -4 Z" fill="#E85B7A"/>
+        </g>
+      </g>
+    </g>
+  </svg>
+  <span class="mascot-tooltip absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-sage-900 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
+    Say hi — request a demo
+    <span class="absolute top-full right-6 -mt-px border-4 border-transparent border-t-sage-900"></span>
+  </span>
+</a>
+
+<script src="site.js"></script>
+</body>
+</html>
